@@ -1,0 +1,685 @@
+<div style="height : 100%">
+
+
+  <div ng-if="c.step==0">
+    <div>
+      <h1>
+        WELCOME TO SUHA MF INTEGRATION
+      </h1>
+      <h3>
+        Here is the place to onboard your metrics into SUHA Dashboard.
+      </h3>
+      <p>
+        We know you are Metric Framework users, to get your metrics tracked or analysed in an efficient way, SUHA is the answer for that. You are at the right place to onboard your MF metrics to SUHA in a simple and easy way.
+      </p>
+      <p>
+        We help you in a intelligent way to onboard your metrics safely, for that you need to go by step by step process, if you are ready to be a part of SUHA services Get Started
+      </p>
+
+    </div>
+    <button id="next" class="btn btn-primary" style="float: right;" ng-click="c.getStarted()">Get Started</button>
+
+  </div>
+
+  <div ng-if="c.step!=0">
+    <head>
+
+      <link data-require="select2@*" data-semver="4.0.0" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.css" />
+      <script data-require="select2@*" data-semver="4.0.0" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.js"></script>
+      <script data-require="angular-select2@v0.0.2" data-semver="v0.0.2" src="https://cdn.rawgit.com/willcrisis/angular-select2-old/v0.0.2/select2.js"></script>
+
+    </head>
+
+
+    <!-- wizard controller -->
+    <div >   
+      <div class="navbar navbar-default fixedElement" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header progress-header ng-binding">MF SUHA Bridge<span ng-show="name" class="ng-binding ng-hide" aria-hidden="true">: </span>
+
+          </div>
+          <div class = "right" >
+            <button id="back" class="btn " ng-disabled = "c.step == 1 || (c.step == 3 && c.inProgress)" ng-click="c.back()" ng-class = "c.getButtonClass('back')">Back</button>
+            <button id="next" ng-disabled = "validateStep()" class="btn "  ng-click="c.next()" ng-class = "c.getButtonClass('next')">Next</button>
+          </div>
+        </div>
+      </div>
+      <ol class="process-breadcrumb">
+        <li ng-class="[{active: c.step==1}, {disabled: !validateStep(c.step) &amp;&amp; c.step != 1}]" class="active">
+          <a href="#"  aria-hidden="false" tabindex="1" class="ng-binding bold black" >Application Details</a>
+        </li>
+        <li ng-class="[{active: c.step==2}, {disabled: !validateStep(c.step) &amp;&amp; c.step != 2}]" class="disabled">
+          <a href="#"  aria-hidden="true" tabindex="-1" class="ng-binding  bold black" >Metrics Selection</a>
+        </li>
+        <li ng-class="[{active: c.step==3}, {disabled: !validateStep(c.step) &amp;&amp; c.step != 3}]" class="disabled no-after">
+          <a href="#"  aria-hidden="true" tabindex="-1" class="ng-binding  bold black"  >Progress and Status</a>
+        </li>
+      </ol>
+    </div>
+    <!-- wizard controller ends-->
+
+    <br>
+    <div class="content-panel" >
+
+      <div ng-if="c.step==1">
+        <div class="form">
+
+          <!-- form for registering for new service -->
+          <form class="service-register-form" ng-if="c.login_status==0">
+            <div>
+              <script>
+                var serviceSubmitted = function() {
+                  CustomEvent.fire('close.service');
+                }
+              </script>
+              <iframe src="/u_suha_group.do" width="100%" height="700px"></iframe>
+              <p class="message">Service already exists? <a href="#" ng-click="c.signInFormEnabler()">Select Service</a></p>
+            </div>
+          </form>
+
+          <!-- form for already registered services-->
+          <form class="service-form" ng-if="c.login_status==1">
+            <div class = "row">
+              <div class = "col-sm-6">
+                <div class = "row">
+                  <div class=" col-sm-6 text-right" >
+                    <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                      <span class="required-marker"></span>Service
+                    </label>
+                  </div>
+                  <div class="col-sm-6">
+                    <sn-record-picker field="get_service" default-query=c.service_list table="'u_suha_group'" display-field="'u_name'" value-field="'sys_id'" search-fields="'u_name'" page-size="100" ></sn-record-picker>
+                    <div ng-if="c.data.service_name==''">
+                      <div class="fieldmsg notification notification-info">Select your service from the list (A service is a part of org hierarchy). if your service is not available please create a new service using below link.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class = "row">
+                  <div  class=" col-sm-6 text-right">
+                  </div>
+                  <div  class=" col-sm-6">
+                    <p class="message">No Service? <a href="#" ng-click="c.signUpFormEnabler()">Create New Service</a></p>
+                  </div>
+                </div>
+                <div class = "row">
+                  <div class=" col-sm-6 text-right">
+                    <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                      <span class="required-marker"></span>Scope
+                    </label>
+                  </div>
+                  <div class=" col-sm-6">
+                    <sn-record-picker field="get_scope" table="'sys_scope'" display-field="'name'" value-field="'sys_id'" search-fields="'name'" page-size="100" ng-click="c.scopeSelection()"></sn-record-picker><br>
+                    <div ng-if="c.scope==''">
+                      <div class="fieldmsg notification notification-info">Select your scope from the list. If it's a Global application please select global and you need to select your MF extended tables manually. if scoped we directly load your tables and analyse your metrics</div>
+                    </div>
+                  </div>
+                </div>
+                <!--<div class = "row"  ng-if="c.scope=='global'">
+<div class="col-sm-6  text-right">
+<label for="name" class="control-label col-sm-9 ng-binding bold black right">
+<span class="required-marker"></span>Please choose your MF tables
+</label>
+</div>
+<div class="col-sm-6">
+<sn-record-picker field="get_global_tables" multiple="true" default-query=c.global_tables table="'sys_db_object'" display-field="'label'" display-fields="'name'" value-field="'sys_id'" search-fields="'label,name'" page-size="100" ng-click="c.scopeSelection()"></sn-record-picker>
+</div>
+</div>-->           
+              </div>
+            </div>
+            <br>
+            <br>
+            <div ng-show="showTablePicker()" style = "padding-left: 10%; padding-right: 10%;">
+              <div style = "height: 30px;
+                            text-align: left;" >
+                <label for="name" class=" ng-binding bold black" style = "margin: 0px auto; display: block;">
+                  <span class="required-marker"></span>Please choose your MF tables
+
+
+                </label>
+              </div>
+              <br>
+              <div>
+                <sp-widget widget="data.filterBreadcrumbs"></sp-widget>
+              </div>
+              <div ng-if="c.data.tables.length==0">
+                <div class="fieldmsg notification notification-info">Select your MF extendend tables. upon selecting we will provide you some metrics that we extract from your tables in next step </div>
+                <br>
+              </div>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+
+      <div ng-if="c.step==2">
+
+        <div class="container">
+
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              Suggested Metrics
+              <!-- <button id = "suggested_metrics_header" class="transparent right" type="button" data-toggle="collapse" data-target="#suggested_metrics" aria-expanded="false" aria-controls="suggested_metrics">
+<span class="dropDown fa fa-window-minimize" aria-hidden="true"></span>
+</button>-->
+            </div>
+            <div class="panel-body collapse in" id = "suggested_metrics">
+
+              <div>   
+                <div ng-if="metric.onboardState!='complete'" ng-repeat="metric in c.clientJSON">
+                  <div class="panel panel-default metric-instance curved">
+                    <div ng-if ="metric.emptyFields && metric.emptyFields.length > 0"role="alert" class="outputmsg outputmsg_error notification notification-error">
+                      <span class="notification-icon icon-cross-circle">
+                        <span class="sr-only">
+                          Error Message
+                        </span>
+                      </span>
+                      <span class="outputmsg_text">
+                        The following mandatory fields are not filled in: {{ metric.emptyFields.join(' , ') }}
+                      </span>
+                    </div>
+                    <div class = "toolbar right row">
+
+                      <!-- <span class="tooltip1 tool-icon" >
+<i class="glyphicon glyphicon-info-sign "></i>
+<span class="tooltiptext1 custom">{{metric.name}} Metric is derived from the table {{metric.tableName}} which collects the data from the table for every {{metric.collectionFrequency[metric.defaultFrequency]}} and does an aggregate "{{metric.aggregation[metric.defaultAggregation]}}" on the data  <span ng-repeat="cols in metric.tableColumns">using the columns {{cols}}</span> </span>
+</span> -->
+                      <label class="switch">
+                        <input type="checkbox" ng-init='metric.isSelected=true' ng-model='metric.isSelected'>
+                        <span class="slider round"></span>
+                      </label>
+
+
+                    </div>
+                    <br>
+
+                    <div class = "content">
+
+                      <div class = "row">
+                        <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <div class = "row">
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                              <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                                Table
+                              </label>
+                            </div>
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <select disabled class = "form-control readonly"  ng-model="metric.tableSysID" ng-change="c.loadFields(c.loadedTables[metric.tableSysID])" ng-options="key as value.label for (key , value) in c.loadedTables ">
+                              </select>
+                              <!-- <sn-record-picker sn-disabled = true field="metric.table"  table="'sys_db_object'" display-field="'name'" value-field="'name'" search-fields="'name'" 
+default-query="c.defaultQuery"
+page-size="100" ></sn-record-picker>
+-->
+                            </div>          
+                          </div>
+                        </div>
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <div class = "row" ng-if = "metric.tableColumns && metric.tableColumns.length > 0">
+
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                              <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                                Column
+                              </label>
+                            </div>
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <select  class = "form-control readonly"  ng-model="metric.selectedColumn" ng-init="metric.selectedColumn = metric.tableColumns[0].name "  ng-options="column.name as column.label for column in  metric.tableColumns">
+                              </select>
+                            </div>   
+
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class = "row">               
+                        <div  class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <div class = "row" ng-if="metric.aggregation!=null">
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                              <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                                Aggregation
+                              </label>
+                            </div>
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <select  class = "form-control" ng-model="metric.defaultAggregation" ng-options="key as value for (key, value) in metric.aggregation">
+                              </select>
+                            </div>          
+                          </div>
+                        </div >
+                        <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <div class = "row">
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                              <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                                Frequency
+                              </label>
+                            </div>
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <select class = "form-control" ng-model="metric.defaultFrequency" ng-options="key as value for (key, value) in metric.collectionFrequency">
+                              </select>
+                            </div>          
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class = "row">
+                        <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <div class = "row">
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                              <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                                <span class="required-marker"></span>
+                                Metric name
+                              </label>
+                            </div>
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <input type="text" class = "form-control" ng-model="metric.name" >
+                            </div>          
+                          </div>  
+                        </div>
+
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <div class = "row">
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                              <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                                Unit
+                              </label>
+                            </div>
+                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <sn-record-picker sn-disabled = true field="metric.unit"  table="'pa_units'" display-field="'name'" value-field="'name'" search-fields="'name'" page-size="100" ></sn-record-picker>
+
+                            </div>   
+
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class = "row">
+                        <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <div class = "row" ng-if="metric.successStates && metric.successStates.length > 0">
+                            <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right">
+                              <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                                <span class="required-marker"></span>
+                                Success states
+                              </label>
+                            </div>
+                            <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <select select2   multiple ng-model="metric.selectedStates" placeholder="Select States" id="search" ng-options="value as value for value in metric.successStates">
+                              </select>
+                            </div>
+                          </div>
+
+                        </div>
+                        <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
+                        </div>
+                      </div>
+
+                      <div class = "row">
+                        <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <div class = "row" ng-if="metric.failureStates && metric.failureStates.length > 0">
+                            <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right">
+                              <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                                <span class="required-marker"></span>
+                                Failure States
+                              </label>
+                            </div>
+                            <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <select select2   multiple ng-model="metric.selectedStates" placeholder="Select States" id="search" ng-options="value as value for value in metric.failureStates">
+                              </select>
+                            </div>
+                          </div>
+
+                        </div>
+                        <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
+                        </div>
+                      </div>
+
+                    </div>
+
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+        <div class="container">
+          <div class="panel panel-default">
+            <div class="panel-heading">Custom metrics</div>
+            <div class="panel-body">
+
+
+              <br>
+              <div ng-if="metric.isCustom=='true'" ng-repeat="metric in c.listOfCustomMetrics"> 
+
+                <div class="panel panel-default metric-instance curved">
+
+                  <div ng-if ="metric.emptyFields && metric.emptyFields.length > 0"role="alert" class="outputmsg outputmsg_error notification notification-error">
+                    <span class="notification-icon icon-cross-circle">
+                      <span class="sr-only">
+                        Error Message
+                      </span>
+                    </span>
+                    <span class="outputmsg_text">
+                      The following mandatory fields are not filled in: {{ metric.emptyFields.join(' , ') }}
+                    </span>
+                  </div>
+                  <div class = "toolbar right row">
+
+                    <span class="tooltip1 tool-icon" >
+                      <i class="glyphicon glyphicon-info-sign "></i>
+                      <span class="tooltiptext1 custom">{{metric.name}} Metric is derived from the table {{metric.tableName}} which collects the data from the table for every {{metric.collectionFrequency[metric.defaultFrequency]}} and does an aggregate "{{metric.aggregation[metric.defaultAggregation]}}" on the data  <span ng-repeat="cols in metric.tableColumns">using the columns {{cols}}</span> </span>
+                    </span>
+                    <span class = "tool-icon" ng-click="c.deleteCustomtJSON($index)">
+                      <i class="fa fa-minus "  uib-tooltip = "Remove"  ></i>
+                    </span>
+                  </div>
+                  <br>
+
+                  <div class = "content">
+
+                    <div class = "row">
+                      <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <div class = "row">
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                            <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                              <span class="required-marker"></span>
+                              Table
+                            </label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <select class = "form-control"  ng-model="metric.tableSysID" ng-change="c.loadFields(metric, c.loadedTables[metric.tableSysID])" ng-options="key as value.label for (key , value) in c.loadedTables ">
+                            </select>
+                            <!-- <sn-record-picker on-change = "c.loadFields(c.loadedTables[metric.tableSysID])" field="metric.table"  table="'sys_db_object'" display-field="'name'" value-field="'name'" search-fields="'name'" 
+default-query="c.defaultQuery"
+page-size="100" ></sn-record-picker>-->
+                          </div>          
+                        </div>
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <div class = "row">
+
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                            <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                              <span class="required-marker"></span>
+                              Column
+                            </label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <select class = "form-control"  ng-model="metric.selectedColumn" ng-options="column.name as column.label for column in  metric.tableColumns">
+                            </select>
+                          </div>   
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class = "row">
+                      <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <div class = "row" ng-if="metric.aggregation!=null">
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                            <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                              Aggregation
+                            </label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <select  class = "form-control" ng-model="metric.defaultAggregation" ng-options="key as value for (key, value) in metric.aggregation">
+                            </select>
+                          </div>          
+                        </div>
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <div class = "row">
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                            <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                              Frequency
+                            </label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <select  class = "form-control" ng-model="metric.defaultFrequency" ng-options="key as value for (key, value) in metric.collectionFrequency">
+                            </select>
+                          </div>          
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class = "row">
+                      <div class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <div class = "row">
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                            <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                              <span class="required-marker"></span>
+                              Metric name
+                            </label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <input class = "form-control" type="text" ng-model="metric.name" >
+                          </div>          
+                        </div>  
+                      </div>
+                      <div  class = "col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <div class = "row">
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 text-right" >
+                            <label for="name" class="control-label col-sm-9 ng-binding bold black right">
+                              <span class="required-marker"></span>
+                              Unit
+                            </label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <sn-record-picker  field="metric.unit"  table="'pa_units'" display-field="'name'" value-field="'name'" search-fields="'name'" page-size="100" ></sn-record-picker>
+
+                          </div>   
+
+                        </div>
+                      </div >
+                    </div>
+
+                  </div>
+
+
+                </div>
+
+              </div>
+
+              <br>
+              <div style = "width:100%; text-align : center;">
+                <button id="add" class="fa fa-3x fa-plus-circle transparent transparent-button no-shadow"  ng-click="c.loadCustomtJSON()" >
+
+                </button>
+
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+
+
+
+      </div>
+
+
+      <div ng-if="c.step==3">
+
+
+
+        <button type="button" ng-disabled = "c.inProgress" class="btn btn-primary" style="float: right; margin : 5px; " ng-click="c.createSUHAComponentsFromIR()">Create</button>
+
+        <button type="button" class="btn btn-primary" ng-if="c.addToDashboard" ng-click="c.checkDashBoard()" style="float: right; margin: 5px;">Add Metrics to Dashboard</button> 
+
+        <a ng-if="c.addToDashboard" href = {{c.dashboardLink}}  target = '_blank' style="float: right; margin: 5px;">
+          <button type="button" class="btn btn-primary">Dashboard</button> 
+        </a>
+
+        <script type="text/ng-template" id="ModalFormWidget">
+ 			<sp-widget widget="c.dashBoardForm"></sp-widget>
+        </script> 
+
+        <script type = "text/ng-template" id = "dashboardLink">
+      <h1>
+          </h1>
+        </script>
+        <br><br><br>
+
+
+        <div class="grid-container">
+          <div ng-repeat="iRComponent in c.iRJSON"> 
+            <div class="grid-item">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <div class="loading-spinner" style="display:none;">
+                    <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+                  </div>   
+                  {{iRComponent.metric.name}}
+                </div>
+                <div class="panel-body">
+
+
+                  <!--
+
+<div class='progress'>
+<div class='progress-bar bg-success' role='progressbar' aria-valuenow='50' aria-valuemin='0' aria-valuemax='80' style='width:0%'>
+</div>
+<div class='progress-bar bg-danger' role='progressbar' aria-valuenow='50' aria-valuemin='0' aria-valuemax='80' style='width:0%'>
+</div>
+<div class='progress-bar bg-warning' role='progressbar' aria-valuenow='50' aria-valuemin='0' aria-valuemax='80' style='width:0%'>
+</div>
+</div>
+
+-->
+
+
+                  <div class='final-status' style="display:none;">
+
+                    <div class='info-bar'>
+
+                      <div class = "row">
+                        <div class = "col-sm-2">
+                          <i class="fa"  ng-class = "c.getStatusClass(c.status[iRComponent.metric.name]['dataSource']['status'])" aria-hidden="true"></i>
+                        </div>
+                        <div class = "col-sm-10" style = "text-align: left;">
+                          Data Source 
+                          <a href={{c.status[iRComponent.metric.name]['dataSource']['link']}} target="_blank"> {{c.status[iRComponent.metric.name]['dataSource']['componentDetails']['u_name']}} </a> 
+                          <span ng-if = "c.status[iRComponent.metric.name]['dataSource']['status'] == 0">
+                            Already Exists
+                          </span>
+                          <span ng-if = "c.status[iRComponent.metric.name]['dataSource']['status'] == 1">
+                            Created
+                          </span>
+                          <span ng-if = "c.status[iRComponent.metric.name]['dataSource']['status'] == -1">
+                            Error failed to create
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class = "row">
+                        <div class = "col-sm-2">
+                          <i class="fa"  ng-class = "c.getStatusClass(c.status[iRComponent.metric.name]['metricDefinition']['status'])" aria-hidden="true"></i>
+                        </div>
+                        <div class = "col-sm-10" style = "text-align: left;">
+                          Metric Definition
+                          <a href={{c.status[iRComponent.metric.name]['metricDefinition']['link']}} target="_blank"> {{c.status[iRComponent.metric.name]['metricDefinition']['componentDetails']['u_name']}} </a> 
+                          <span ng-if = "c.status[iRComponent.metric.name]['metricDefinition']['status'] == 0">
+                            Already Exists
+                          </span>
+                          <span ng-if = "c.status[iRComponent.metric.name]['metricDefinition']['status'] == 1">
+                            Created
+                          </span>
+                          <span ng-if = "c.status[iRComponent.metric.name]['metricDefinition']['status'] == -1">
+                            Error failed to create
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class = "row">
+                        <div class = "col-sm-2">
+                          <i class="fa"  ng-class = "c.getStatusClass(c.status[iRComponent.metric.name]['groupMetricDefinition']['status'])" aria-hidden="true"></i>
+                        </div>
+                        <div class = "col-sm-10" style = "text-align: left;">
+                          Group Metric Definition
+                          <a href={{c.status[iRComponent.metric.name]['groupMetricDefinition']['link']}} target="_blank"> {{c.status[iRComponent.metric.name]['groupMetricDefinition']['componentDetails']['u_name']}} </a> 
+                          <span ng-if = "c.status[iRComponent.metric.name]['groupMetricDefinition']['status'] == 0">
+                            Already Exists
+                          </span>
+                          <span ng-if = "c.status[iRComponent.metric.name]['groupMetricDefinition']['status'] == 1">
+                            Created
+                          </span>
+                          <span ng-if = "c.status[iRComponent.metric.name]['groupMetricDefinition']['status'] == -1">
+                            Error failed to create
+                          </span>
+
+                        </div>
+                      </div>
+
+                      <!--<div uib-tooltip="Error Occured" ng-if = "c.status[iRComponent.metric.name]['dataSource']['status']==-1">
+<i class="fa fa-times" style="color:red" aria-hidden="true"></i> <p> Error While Creating Data Source</p>
+</div>
+
+<div uib-tooltip="Already Exist" ng-if = "c.status[iRComponent.metric.name]['dataSource']['status']==0">
+<i class="fa fa-recycle" style="color:green" aria-hidden="true"></i> Data Source <a href={{c.status[iRComponent.metric.name]['dataSource']['link']}} target="_blank">{{c.status[iRComponent.metric.name]['dataSource']['componentDetails']['u_name']}}</a> Already Exist
+</div>
+
+<div uib-tooltip="created" ng-if = "c.status[iRComponent.metric.name]['dataSource']['status']==1">
+<i class="fa fa-check" style="color:green" aria-hidden="true"></i> Data Source <a href={{c.status[iRComponent.metric.name]['dataSource']['link']}} target="_blank">{{c.status[iRComponent.metric.name]['dataSource']['componentDetails']['u_name']}}</a> Created
+</div>
+
+<div uib-tooltip="Error Occured" ng-if = "c.status[iRComponent.metric.name]['metricDefinition']['status']==-1">
+<i class="fa fa-times" style="color:red" aria-hidden="true"></i> <p>Error While Creating Metric Definition </p>
+</div>
+<div uib-tooltip="Already Exist" ng-if = "c.status[iRComponent.metric.name]['metricDefinition']['status']==0">
+<i class="fa fa-recycle" style="color:green" aria-hidden="true"></i> Metric Definition <a href={{c.status[iRComponent.metric.name]['metricDefinition']['link']}} target="_blank">{{c.status[iRComponent.metric.name]['metricDefinition']['componentDetails']['u_name']}}</a>  Already Exist
+</div>
+
+<div uib-tooltip="created" ng-if = "c.status[iRComponent.metric.name]['metricDefinition']['status']==1">
+<i class="fa fa-check" style="color:green" aria-hidden="true"></i> Metric Definition <a href={{c.status[iRComponent.metric.name]['metricDefinition']['link']}} target="_blank">{{c.status[iRComponent.metric.name]['metricDefinition']['componentDetails']['u_name']}}</a> Created
+</div>
+
+<div uib-tooltip="Error Occured" ng-if = "c.status[iRComponent.metric.name]['groupMetricDefinition']['status']==-1">
+<i class="fa fa-times" style="color:red" aria-hidden="true"></i> <p>Error While Creating Group Metric Definition</p>
+</div>
+
+<div uib-tooltip="Already Exist" ng-if = "c.status[iRComponent.metric.name]['groupMetricDefinition']['status']==0">
+<i class="fa fa-recycle" style="color:green" aria-hidden="true"></i> Group Metric Definition <a href={{c.status[iRComponent.metric.name]['groupMetricDefinition']['link']}} target="_blank">{{c.status[iRComponent.metric.name]['groupMetricDefinition']['componentDetails']['u_name']}}</a>Already Exist
+</div>
+
+<div uib-tooltip="created" ng-if = "c.status[iRComponent.metric.name]['groupMetricDefinition']['status']==1">
+<i class="fa fa-check" style="color:green" aria-hidden="true"></i> Group Metric Definition <a href={{c.status[iRComponent.metric.name]['groupMetricDefinition']['link']}} target="_blank">{{c.status[iRComponent.metric.name]['groupMetricDefinition']['componentDetails']['u_name']}}</a> Created
+</div> -->
+
+
+                    </div>
+
+
+
+
+
+
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+      </div>
+
+    </div>
+    <br>
+    <hr>
+    <div class = "navigator form-field col-sm-12" >
+      <button id="back" class="btn " ng-disabled = "c.step == 1 || (c.step == 3 && c.inProgress)"style="float: left;" ng-click="c.back()" ng-class = "c.getButtonClass('back')">Back</button>
+      <button id="next" ng-disabled = "validateStep()" class="btn " style="float: right;" ng-click="c.next()" ng-class = "c.getButtonClass('next')">Next</button>
+    </div>
+  </div>
+</div>
+
+
+
+
